@@ -218,3 +218,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------- PharmaPro
+# Keep the PyInstaller build configurations (the template above ignores *.spec).
+!PharmaPro.spec
+!PharmaPro-onefile.spec
+
+# Local runtime data – never commit a pharmacy's database, backups or logs.
+data/*.db
+data/*.db-journal
+data/*.lock
+backups/*.db
+logs/
+*.log
+receipts/
+exports/
+
+# Build output and tooling
+dist-linux/
+.claude/
