@@ -45,7 +45,9 @@
 ```
 PharmaPro/
 ├── main.py                     # entry point (Qt app, logging, error handler)
-├── PharmaPro.spec              # PyInstaller build configuration
+├── PharmaPro-onefile.spec      # PyInstaller: single-file exe (Windows / Linux)
+├── PharmaPro.spec              # PyInstaller: folder build
+├── .github/workflows/build.yml # CI: tests + builds both executables
 ├── requirements.txt
 ├── app/
 │   ├── config.py               # paths (data/, backups/, logs/…) and logging
@@ -152,7 +154,7 @@ python -m pytest -q
 | Running from | Database |
 |---|---|
 | Source | `PharmaPro/data/pharmapro.db` |
-| Packaged app | `data/pharmapro.db` next to `PharmaPro.exe` |
+| Packaged app | `data\pharmapro.db` next to `PharmaPro.exe` (or the Linux `PharmaPro` file) |
 | Packaged app in a read-only folder (e.g. Program Files) | `%LOCALAPPDATA%\PharmaPro\data\pharmapro.db` |
 
 The **About** screen and **Settings → Data safety** both show the exact path in use.
@@ -164,21 +166,45 @@ The **About** screen and **Settings → Data safety** both show the exact path i
 - **Automatic backup:** one copy per day when PharmaPro starts (on by default). The newest 30 are kept; you can change this in Settings.
 - **Restore** checks that the file is a valid, undamaged PharmaPro backup and asks for confirmation. It saves your current data as `PharmaPro_BeforeRestore_….db` before replacing it, so a restore can always be undone.
 
-## Packaging (Windows executable)
+## Ready-to-run executables (single file)
 
-On a Windows computer with Python 3.11+ installed:
+PharmaPro ships as **one self-contained file** per platform. The target computer does not need Python or any other software.
+
+| Platform | File | How to run |
+|---|---|---|
+| Windows 10 / 11 (64-bit) | `PharmaPro.exe` | Copy it anywhere (e.g. `C:\PharmaPro\`) and double-click |
+| Linux x86-64 (Ubuntu 22.04+, Debian 12+, Fedora 35+, Mint 21+) | `PharmaPro` | `chmod +x PharmaPro` then double-click or run `./PharmaPro` |
+
+- **Your data lives next to the executable,** in `data\`, `backups\`, `logs\`, `receipts\` and `exports\` folders created on first launch. Put the file in a folder you can write to (for example `C:\PharmaPro\`, not the Desktop of another user). If that folder is read-only, PharmaPro uses `%LOCALAPPDATA%\PharmaPro` (Windows) or `~/.local/share/PharmaPro` (Linux) instead.
+- **First launch takes a few seconds.** The single file unpacks itself to a temporary folder each time it starts. Only one copy of PharmaPro can run at a time.
+- **Updating:** replace the executable with the new one. Your `data` folder is untouched. Back up first anyway.
+- **Windows SmartScreen** may say "Windows protected your PC" because the file isn't code-signed. Click **More info → Run anyway**. Signing the `.exe` with a code-signing certificate removes this warning.
+- **Linux requirements:** a normal desktop install already has everything. On a minimal system, install the Qt runtime libraries: `sudo apt install libxcb-cursor0 libxkbcommon-x11-0 libegl1` (Debian/Ubuntu).
+
+## Building the executables
+
+**Windows** (on a Windows PC with Python 3.11+):
 
 ```bat
 packaging\build_windows.bat
 ```
 
-This creates a virtual environment, installs dependencies, runs the tests and builds **`dist\PharmaPro\PharmaPro.exe`**. Copy the whole `dist\PharmaPro` folder to the pharmacy computer. Python is not needed there; just double-click `PharmaPro.exe`.
+This creates a virtual environment, installs dependencies, runs the tests and produces **`dist\PharmaPro.exe`**. Run `packaging\build_windows.bat onedir` for a folder build (`dist\PharmaPro\PharmaPro.exe`) that starts faster.
 
-To build manually: `pyinstaller --noconfirm --clean PharmaPro.spec`
+**Linux:**
 
-On Linux: `bash packaging/build_linux.sh` → `dist/PharmaPro/PharmaPro`.
+```bash
+bash packaging/build_linux.sh          # -> dist/PharmaPro (single file)
+bash packaging/build_linux.sh onedir   # -> dist/PharmaPro/PharmaPro
+```
 
-PyInstaller cannot cross-compile, so build the Windows `.exe` on Windows.
+For the widest compatibility, build with a Python that targets an old glibc (e.g. `uv python install 3.12`), or on the oldest distribution you want to support.
+
+**Manually:** `pyinstaller --noconfirm --clean PharmaPro-onefile.spec` (single file) or `PharmaPro.spec` (folder).
+
+**Automatically (GitHub Actions):** `.github/workflows/build.yml` tests and builds both executables on real Windows and Linux machines on every push. Pushing a tag such as `v1.0.0` attaches `PharmaPro.exe` and `PharmaPro` to a GitHub Release.
+
+The single-file spec strips Qt components PharmaPro doesn't use (QML/Quick, virtual keyboard, PDF plugin, translations). On Linux it also leaves out the build machine's own system libraries, so the binary runs on other distributions.
 
 ## Troubleshooting
 

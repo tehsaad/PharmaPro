@@ -237,3 +237,4 @@ exports/
 # Build output and tooling
 dist-linux/
 .claude/
+dist-linux/

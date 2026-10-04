@@ -50,6 +50,19 @@ def main(argv=None) -> int:
         return 1
     log = logging.getLogger("pharmapro")
 
+    # Only one PharmaPro window per data folder (a single-file exe can be double-clicked twice
+    # while it is still unpacking).
+    from PySide6.QtCore import QLockFile
+
+    lock = QLockFile(str(paths.data / "pharmapro.lock"))
+    lock.setStaleLockTime(0)
+    if not lock.tryLock(100):
+        lock.removeStaleLockFile()
+        if not lock.tryLock(100):
+            QMessageBox.information(None, APP_NAME, "PharmaPro is already running.\n\n"
+                                    "Look for its window in the taskbar.")
+            return 0
+
     def excepthook(exc_type, exc, tb):
         log.error("Unhandled error:\n%s", "".join(traceback.format_exception(exc_type, exc, tb)))
         from app.ui.widgets import show_exception
