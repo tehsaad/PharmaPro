@@ -95,7 +95,7 @@ def test_sample_data_seed(ctx):
     with ctx.db.read() as s:
         assert s.query(Medicine).count() == result["medicines"]
     buckets = ctx.inventory.expiry_buckets()
-    assert buckets["expired"] >= 1 and buckets["30"] >= 1
+    assert buckets["expired"] >= 1 and buckets["90"] >= 1
     summary = ctx.profit.summary(date(2000, 1, 1), date.today())
     assert summary.revenue > 0 and summary.gross_profit > 0
     with pytest.raises(ValidationError):

@@ -36,7 +36,7 @@ MEDICINES = [
 ]
 
 # Opening quantities kept small so these items demonstrate low-stock warnings.
-LOW_DEMO = {"AML005": 230, "LOR010": 150}
+LOW_DEMO = {"AML005": 270, "LOR010": 165}
 
 SUPPLIERS = ["ABC Pharmaceuticals", "Crescent Distributors", "Unity Medical Supplies"]
 
@@ -100,7 +100,7 @@ def seed(ctx, days_of_sales: int = 75, rng_seed: int = 7) -> dict:
 
     # Purchase 4: short-dated stock of slow movers (expiring within 30 / 60 / 90 days).
     ctx.purchases.add_stock(SUPPLIERS[0], "INV-2101", today - timedelta(days=20), [
-        StockLine(ids["SAL100"], "SAL-C210", today + timedelta(days=24), 40, "320", "420"),
+        StockLine(ids["SAL100"], "SAL-C210", today + timedelta(days=24), 70, "320", "420"),
         StockLine(ids["FLU150"], "FLU-C330", today + timedelta(days=52), 120, "45", "70"),
         StockLine(ids["CAL500"], "CAL-C118", today + timedelta(days=80), 110, "180", "250"),
     ])
@@ -112,14 +112,16 @@ def seed(ctx, days_of_sales: int = 75, rng_seed: int = 7) -> dict:
     sale_count = 0
     for offset in range(days_of_sales, -1, -1):
         day = today - timedelta(days=offset)
+        times = []
         for _ in range(rng.randint(8, 16) if offset else rng.randint(4, 8)):
             hour = rng.randint(9, 21) if offset else min(datetime.now().hour, rng.randint(9, 21))
             when = datetime.combine(day, time(hour, rng.randint(0, 59), rng.randint(0, 59)))
             jitter = rng.randint(1, 30)  # always drawn, so results don't depend on the time of day
             if when > datetime.now():
                 when = datetime.now().replace(microsecond=0) - timedelta(minutes=jitter)
-                if when.date() != day:
-                    continue
+            if when.date() == day:
+                times.append(when)
+        for when in sorted(times):  # receipt numbers follow the time of day
             chosen = rng.sample(codes, k=rng.randint(1, 4))
             cart = [CartLine(ids[c], rng.choice([1, 2, 2, 3, 4, 5])) for c in chosen
                     if rng.random() < weights[c] / 10 + 0.2]

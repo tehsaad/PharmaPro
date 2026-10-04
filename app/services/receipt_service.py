@@ -109,7 +109,7 @@ class ReceiptService:
         header_lines = 3 + bool(data.address) + bool(data.phone) + bool(data.email) + bool(data.license_number)
         body_lines = sum(len(w) + 1 for w in wrapped)
         footer_lines = 8 + len(_wrap(data.footer, name_chars + 10))
-        height = (header_lines + body_lines + footer_lines) * (fs + 4) + 30 * mm
+        height = (header_lines + body_lines + footer_lines) * (fs + 4) + 14 * mm
         c = canvas.Canvas(str(path), pagesize=(width, height))
         c.setTitle(f"Receipt {data.receipt_number}")
         y = height - 6 * mm
