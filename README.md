@@ -174,6 +174,7 @@ PharmaPro ships as **one self-contained file** per platform. The target computer
 |---|---|---|
 | Windows 10 / 11 (64-bit) | `PharmaPro.exe` | Copy it anywhere (e.g. `C:\PharmaPro\`) and double-click |
 | Linux x86-64 (Ubuntu 22.04+, Debian 12+, Fedora 35+, Mint 21+) | `PharmaPro` | `chmod +x PharmaPro` then double-click or run `./PharmaPro` |
+| Ubuntu / Debian / Mint (installer) | `pharmapro_1.0.0_amd64.deb` | `sudo apt install ./pharmapro_1.0.0_amd64.deb`, then open **PharmaPro** from the applications menu or run `pharmapro`. Data is stored in `~/.local/share/PharmaPro` |
 
 - **Your data lives next to the executable,** in `data\`, `backups\`, `logs\`, `receipts\` and `exports\` folders created on first launch. Put the file in a folder you can write to (for example `C:\PharmaPro\`, not the Desktop of another user). If that folder is read-only, PharmaPro uses `%LOCALAPPDATA%\PharmaPro` (Windows) or `~/.local/share/PharmaPro` (Linux) instead.
 - **First launch takes a few seconds.** The single file unpacks itself to a temporary folder each time it starts. Only one copy of PharmaPro can run at a time.
@@ -196,6 +197,7 @@ This creates a virtual environment, installs dependencies, runs the tests and pr
 ```bash
 bash packaging/build_linux.sh          # -> dist/PharmaPro (single file)
 bash packaging/build_linux.sh onedir   # -> dist/PharmaPro/PharmaPro
+bash packaging/build_deb.sh            # -> dist/pharmapro_1.0.0_amd64.deb (after the single-file build)
 ```
 
 For the widest compatibility, build with a Python that targets an old glibc (e.g. `uv python install 3.12`), or on the oldest distribution you want to support.
