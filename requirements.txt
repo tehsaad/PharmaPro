@@ -1,0 +1,10 @@
+# Runtime
+PySide6>=6.6
+SQLAlchemy>=2.0
+reportlab>=4.0
+matplotlib>=3.8
+pandas>=2.1
+
+# Development / build
+pytest>=8.0
+pyinstaller>=6.3
